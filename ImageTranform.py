@@ -1,4 +1,4 @@
-from lib import *
+from torchvision import transforms
 
 class ImageTransform():
   def __init__(self, resize, mean, std):
@@ -17,6 +17,7 @@ class ImageTransform():
         ]),
         'test':transforms.Compose([
             transforms.Resize(resize),
+            transforms.CenterCrop(resize),
             transforms.ToTensor(),
             transforms.Normalize(mean, std)
         ])

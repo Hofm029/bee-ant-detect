@@ -1,4 +1,6 @@
-from lib import *
+import os
+from PIL import Image
+import torch.utils.data as data
 
 class MyDataset(data.Dataset):
   def __init__(self, file_list, transforms=None, phase='train'):
@@ -11,18 +13,22 @@ class MyDataset(data.Dataset):
 
   def __getitem__(self, index):
     img_path = self.file_list[index]
-    img = Image.open(img_path)
+
+    try:
+      img = Image.open(img_path)
+    except (IOError, OSError) as e:
+      raise RuntimeError(f"Failed to load image at {img_path}: {e}")
 
     img_transforms = self.transforms(img, self.phase)
-    
-    if self.phase =='train':
-      label = img_path[25:29]
-    elif self.phase == 'val':
-      label = img_path[23:27]
 
-    if label == 'ants':
+    # Extract label from directory name (e.g., 'ants' or 'bees')
+    label_name = os.path.basename(os.path.dirname(img_path))
+
+    if label_name == 'ants':
       label = 0
-    elif label == 'bees':
+    elif label_name == 'bees':
       label = 1
+    else:
+      raise ValueError(f"Unknown label: {label_name}")
 
     return img_transforms, label
